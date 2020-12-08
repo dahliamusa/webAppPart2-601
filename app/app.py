@@ -15,14 +15,18 @@ app.config['MYSQL_DATABASE_PORT'] = 3306
 app.config['MYSQL_DATABASE_DB'] = 'citiesData'
 mysql.init_app(app)
 
-
 @app.route('/', methods=['GET'])
 def index():
+    return render_template('index.html', title='Login')
+
+
+@app.route('/data', methods=['GET'])
+def data():
     user = {'username': 'Cities Project'}
     cursor = mysql.get_db().cursor()
     cursor.execute('SELECT * FROM tblCitiesImport')
     result = cursor.fetchall()
-    return render_template('index.html', title='Home', user=user, cities=result)
+    return render_template('data.html', title='Home', user=user, cities=result)
 
 
 @app.route('/view/<int:city_id>', methods=['GET'])
