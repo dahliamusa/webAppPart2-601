@@ -23,23 +23,60 @@ def index():
 
 @app.route('/', methods=['POST'])
 def login():
-    userInput = (request.form.get('inputEmail'), request.form.get('inputPassword'))
+    inputData = (request.form.get('inputEmail'), request.form.get('inputPassword'))
+    # Check that variables aren't empty
+    for data in inputData:
+        if len(data) == 0:
+            return render_template('index.html', title='Login', message='Enter email and password')
+    # Perform query
     cursor = mysql.get_db().cursor()
-    cursor.execute('SELECT * FROM tblUsers WHERE email=%s AND password=%s', userInput)
+    cursor.execute('SELECT * FROM tblUsers WHERE email=%s AND password=%s', inputData)
     result = cursor.fetchall()
     if len(result) > 0:
-        return redirect('/data', code=302)
+        return redirect('/homepage', code=302)
     else:
-        return render_template('index.html', title='Login')
+        return render_template('index.html', title='Login', message='Incorrect email or password')
 
 
-@app.route('/data', methods=['GET'])
-def data():
+@app.route('/homepage', methods=['GET'])
+def homepage():
     user = {'username': 'Cities Project'}
     cursor = mysql.get_db().cursor()
     cursor.execute('SELECT * FROM tblCitiesImport')
     result = cursor.fetchall()
     return render_template('data.html', title='Home', user=user, cities=result)
+
+
+@app.route('/register', methods=['GET'])
+def register_get():
+    return render_template('register.html', title='Register')
+
+
+@app.route('/register', methods=['POST'])
+def register_post():
+    cursor = mysql.get_db().cursor()
+    inputData = (request.form.get('firstName'), request.form.get('lastName'),
+                 request.form.get('email'), request.form.get('password'))
+    confirmPassword = request.form.get('password2')
+    # Check that variables aren't empty
+    for data in inputData:
+        if len(data) == 0:
+            return render_template('register.html', title='Register', message='Please complete all fields')
+    if len(confirmPassword) == 0:
+        return render_template('register.html', title='Register', message='Please complete all fields')
+    # Check if there is an existing account associated with email
+    cursor.execute('SELECT * FROM tblUsers WHERE email=%s', inputData[2])
+    result = cursor.fetchall()
+    if len(result) > 0:
+        return render_template('register.html', title='Register', message='An account already exists with that email')
+    # Check that passwords match
+    if not inputData[3] == confirmPassword:
+        return render_template('register.html', title='Register', message='The passwords do not match')
+    # Insert data to table
+    sql_insert_query = """INSERT INTO tblUsers (firstName, lastName, email, password) VALUES (%s, %s,%s, %s) """
+    cursor.execute(sql_insert_query, inputData)
+    mysql.get_db().commit()
+    return render_template('index.html', title='Login')
 
 
 @app.route('/view/<int:city_id>', methods=['GET'])
