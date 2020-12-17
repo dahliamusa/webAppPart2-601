@@ -4,6 +4,7 @@ from flask import Flask, request, Response, redirect
 from flask import render_template
 from flaskext.mysql import MySQL
 from pymysql.cursors import DictCursor
+import hashlib
 
 app = Flask(__name__)
 mysql = MySQL(cursorclass=DictCursor)
@@ -18,12 +19,20 @@ mysql.init_app(app)
 
 @app.route('/', methods=['GET'])
 def index():
+    cursor = mysql.get_db().cursor()
+    cursor.execute('SELECT * FROM tblUsers WHERE email=%s', "admin@njit.edu")
+    result = cursor.fetchall()
+    if len(result) == 0:
+        inputData = ("Admin", "NJIT", "admin@njit.edu", hashlib.sha256("admin".encode()).hexdigest())
+        sql_insert_query = """INSERT INTO tblUsers (firstName, lastName, email, password) VALUES (%s, %s,%s, %s) """
+        cursor.execute(sql_insert_query, inputData)
+        mysql.get_db().commit()
     return render_template('index.html', title='Login')
 
 
 @app.route('/', methods=['POST'])
 def login():
-    inputData = (request.form.get('inputEmail'), request.form.get('inputPassword'))
+    inputData = (request.form.get('loginEmail'), hashlib.sha256(request.form.get('loginPassword').encode()).hexdigest())
     # Check that variables aren't empty
     for data in inputData:
         if len(data) == 0:
@@ -55,9 +64,9 @@ def register_get():
 @app.route('/register', methods=['POST'])
 def register_post():
     cursor = mysql.get_db().cursor()
-    inputData = (request.form.get('firstName'), request.form.get('lastName'),
-                 request.form.get('email'), request.form.get('password'))
-    confirmPassword = request.form.get('password2')
+    inputData = (request.form.get('regFirstName'), request.form.get('regLastName'),
+                 request.form.get('regEmail'), hashlib.sha256(request.form.get('regPassword').encode()).hexdigest())
+    confirmPassword = hashlib.sha256(request.form.get('regPassword2').encode()).hexdigest()
     # Check that variables aren't empty
     for data in inputData:
         if len(data) == 0:

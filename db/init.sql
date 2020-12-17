@@ -2,17 +2,16 @@ CREATE DATABASE citiesData;
 use citiesData;
 
 DROP TABLE if exists tblUsers;
+DROP TABLE if exists tblCitiesImport;
 
 CREATE TABLE IF NOT EXISTS tblUsers (
     `id` INT AUTO_INCREMENT,
     `firstName` VARCHAR(50) NOT NULL,
     `lastName` VARCHAR(50) NOT NULL,
     `email` VARCHAR(50) NOT NULL,
-    `password` VARCHAR(50) NOT NULL,
+    `password` VARCHAR(400) NOT NULL,
     PRIMARY KEY (`id`)
 );
-INSERT INTO tblUsers (firstName, lastName, email, password) VALUES
-    ('Dahlia', 'Musa', 'dm79@njit.edu', 'password');
 
 
 CREATE TABLE IF NOT EXISTS tblCitiesImport (
