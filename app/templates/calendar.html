@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+{% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.4.0/main.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/fullcalendar.css') }}">
+
+<div class="container-fluid ">
+
+  <div id='external-events'>
+    <h5 style="text-align: center; margin: 8px 0px 100px 0px">Add Events</h5>
+
+    <p style="text-align: center">
+      <strong>Drag and Drop on Calendar</strong>
+    </p>
+
+    <div id="events-container" contenteditable="true" style="white-space: pre-wrap;">
+      <div class='fc-event fc-h-event fc-daygrid-event fc-daygrid-block-event'>
+        <div class='fc-event-main' title="Click To Edit Event Name">Default Event</div>
+      </div>
+    </div>
+
+    <div style="margin: 100px auto 20px auto">
+      <!--Add buttons to initiate auth sequence and sign out-->
+      <button id="authorize_button" style="display: none;">Authorize</button>
+      <button id="signout_button" style="display: none;">Sign Out</button>
+    </div>
+  </div>
+
+  <div id='calendar-container'>
+    <div id='calendar'></div>
+  </div>
+
+  <div class="row">
+    <pre id="log" style="white-space: pre-wrap;">Last Database Update: </pre><br><br>
+  </div>
+
+
+</div>
+
+
+<!-- Full Calendar JS -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.4.0/main.min.js"></script>
+
+<!-- Google Calendar Custom JS -->
+<script type="text/javascript" src="{{ url_for('static', filename='js/gcalendar.js') }}"></script>
+
+<!-- Full Calendar JS -->
+<script type="text/javascript" src="{{ url_for('static', filename='js/fullcalendar.js') }}"></script>
+
+<!-- Google Calendar API -->
+<script async defer src="https://apis.google.com/js/api.js"
+  onload="this.onload=function(){};handleClientLoad()"
+  onreadystatechange="if (this.readyState === 'complete') this.onload()">
+</script>
+
+
+{% endblock %}
