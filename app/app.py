@@ -219,6 +219,9 @@ def api_delete(city_id) -> str:
     mysql.get_db().commit()
     resp = Response(status=200, mimetype='application/json')
     return resp
+@app.route('/calendar', methods=['GET'])
+def calendar_display():
+    return render_template('calendar.html', title='Calendar Display')
 
 
 if __name__ == '__main__':
