@@ -3,19 +3,24 @@ services:
   app:
     build: ./app
     container_name: "Flask_App"
+    restart: on-failure
     links:
       - db
     depends_on:
       - db
     ports:
       - "5000:5000"
+    volumes:
+      - ./app:/app/:rw
 
   db:
     image: mysql:5.7
+    restart: always
     container_name: "MySQL_Database"
     ports:
       - "32000:3306"
     environment:
       MYSQL_ROOT_PASSWORD: root
     volumes:
-      - ./db:/docker-entrypoint-initdb.d/:ro
+      - ./mysql-data:/var/lib/mysql
+      - ./mysql-init-files:/docker-entrypoint-initdb.d:ro
