@@ -1,6 +1,6 @@
 from typing import List, Dict
 import simplejson as json
-from flask import Flask, request, Response, redirect
+from flask import Flask, request, Response, redirect, session
 from flask import render_template
 from flaskext.mysql import MySQL
 from pymysql.cursors import DictCursor
@@ -15,6 +15,8 @@ app.config['MYSQL_DATABASE_PASSWORD'] = 'root'
 app.config['MYSQL_DATABASE_PORT'] = 3306
 app.config['MYSQL_DATABASE_DB'] = 'citiesData'
 mysql.init_app(app)
+
+app.secret_key = "abc"
 
 
 @app.route('/', methods=['GET'])
@@ -36,24 +38,25 @@ def login():
     # Check that variables aren't empty
     for data in inputData:
         if len(data) == 0:
-            return render_template('index.html', title='Login', message='Enter email and password')
+            return render_template('index.html', title='Log in', message='Enter email and password')
     # Perform query
     cursor = mysql.get_db().cursor()
     cursor.execute('SELECT * FROM tblUsers WHERE email=%s AND password=%s', inputData)
     result = cursor.fetchall()
     if len(result) > 0:
+        session['email'] = result[0]['email']
+        session['firstName'] = result[0]['firstName']
         return redirect('/homepage', code=302)
     else:
-        return render_template('index.html', title='Login', message='Incorrect email or password')
+        return render_template('index.html', title='Log in', message='Incorrect email or password')
 
 
 @app.route('/homepage', methods=['GET'])
 def homepage():
-    user = {'username': 'Cities Project'}
     cursor = mysql.get_db().cursor()
     cursor.execute('SELECT * FROM tblCitiesImport')
     result = cursor.fetchall()
-    return render_template('homepage.html', title='Home', user=user, cities=result)
+    return render_template('homepage.html', title='Home', email=session['email'], user=session['firstName'], cities=result)
 
 
 @app.route('/register', methods=['GET'])
@@ -88,12 +91,27 @@ def register_post():
     return render_template('index.html', title='Login')
 
 
+@app.route('/users', methods=['GET'])
+def users():
+    cursor = mysql.get_db().cursor()
+    cursor.execute('SELECT * FROM tblUsers')
+    result = cursor.fetchall()
+    return render_template('users.html', title='Users', email=session['email'], users=result)
+
+
+@app.route('/logout', methods=['GET'])
+def logout():
+    session.pop('email', None)
+    session.pop('firstName', None)
+    return render_template('index.html', title='Log out')
+
+
 @app.route('/view/<int:city_id>', methods=['GET'])
 def record_view(city_id):
     cursor = mysql.get_db().cursor()
     cursor.execute('SELECT * FROM tblCitiesImport WHERE id=%s', city_id)
     result = cursor.fetchall()
-    return render_template('view.html', title='View Form', city=result[0])
+    return render_template('view.html', title='View Form', email=session['email'], city=result[0])
 
 
 @app.route('/edit/<int:city_id>', methods=['GET'])
@@ -101,7 +119,7 @@ def form_edit_get(city_id):
     cursor = mysql.get_db().cursor()
     cursor.execute('SELECT * FROM tblCitiesImport WHERE id=%s', city_id)
     result = cursor.fetchall()
-    return render_template('edit.html', title='Edit Form', city=result[0])
+    return render_template('edit.html', title='Edit Form', email=session['email'], city=result[0])
 
 
 @app.route('/edit/<int:city_id>', methods=['POST'])
@@ -114,12 +132,12 @@ def form_update_post(city_id):
     %s, t.fldAbbreviation = %s, t.fldCapitalStatus = %s, t.fldPopulation = %s WHERE t.id = %s """
     cursor.execute(sql_update_query, inputData)
     mysql.get_db().commit()
-    return redirect("/", code=302)
+    return redirect("/homepage", code=302)
 
 
 @app.route('/cities/new', methods=['GET'])
 def form_insert_get():
-    return render_template('new.html', title='New City Form')
+    return render_template('new.html', title='New City Form', email=session['email'])
 
 
 @app.route('/cities/new', methods=['POST'])
@@ -131,7 +149,7 @@ def form_insert_post():
     sql_insert_query = """INSERT INTO tblCitiesImport (fldName,fldLat,fldLong,fldCountry,fldAbbreviation,fldCapitalStatus,fldPopulation) VALUES (%s, %s,%s, %s,%s, %s,%s) """
     cursor.execute(sql_insert_query, inputData)
     mysql.get_db().commit()
-    return redirect("/", code=302)
+    return redirect("/homepage", code=302)
 
 
 @app.route('/delete/<int:city_id>', methods=['POST'])
@@ -140,7 +158,7 @@ def form_delete_post(city_id):
     sql_delete_query = """DELETE FROM tblCitiesImport WHERE id = %s """
     cursor.execute(sql_delete_query, city_id)
     mysql.get_db().commit()
-    return redirect("/", code=302)
+    return redirect("/homepage", code=302)
 
 
 @app.route('/api/v1/cities', methods=['GET'])
