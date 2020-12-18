@@ -1,9 +1,11 @@
-# Team Members
-* Dahlia Musa
-* Sahilpreet Singh
-
 # Project Description
 This project is a web application that demonstrates the use of Pycharm setup with Docker, Flask and MySQL.
+
+# Team Members
+* <strong>Dahlia Musa</strong>
+<br />Created the login and registration process and admin account
+* <strong>Sahilpreet Singh</strong>
+<br />Created the Google calendar display
 
 # Features
 * Login process - Log into your account by entering your email and password
