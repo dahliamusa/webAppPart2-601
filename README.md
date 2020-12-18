@@ -1,9 +1,15 @@
-# Project Description
-This is a team project that includes a login and registration process, admin account and Google calendar display.
-
 # Team Members
-* Dahlia Musa - Feature: login and registration process, admin account
-* Sahilpreet Singh - Feature: Google calendar display
+* Dahlia Musa
+* Sahilpreet Singh
+
+# Project Description
+This project is a web application that demonstrates the use of Pycharm setup with Docker, Flask and MySQL.
+
+# Features
+* Login process - Log into your account by entering your email and password
+* Registration process - Create a new account by clicking "Sign up" and submitting your account information
+* Admin account - Use the email "admin@njit.edu" and the password "admin" to log into the admin account, then click on "Users" to view user data
+* Google calendar - After logging in, click "Calendar" and sign into your Google account to view your Google calendar
 
 # Installation Instructions
 
